@@ -1,0 +1,37 @@
+{
+  "target": "Class",
+  "features": [
+    "Area",
+    "Perimeter",
+    "MajorAxisLength",
+    "MinorAxisLength",
+    "AspectRation",
+    "Eccentricity",
+    "ConvexArea",
+    "EquivDiameter",
+    "Extent",
+    "Solidity",
+    "roundness",
+    "Compactness",
+    "ShapeFactor1",
+    "ShapeFactor2",
+    "ShapeFactor3",
+    "ShapeFactor4"
+  ],
+  "classes": [
+    "BARBUNYA",
+    "BOMBAY",
+    "CALI",
+    "DERMASON",
+    "HOROZ",
+    "SEKER",
+    "SIRA"
+  ],
+  "random_state": 2026,
+  "holdout_fraction": 0.2,
+  "rows_raw": 13611,
+  "rows_after_dedup": 13543,
+  "train_rows": 10834,
+  "holdout_rows": 2709,
+  "averaging": "macro (precision, recall, F1); AUC = one-vs-rest macro"
+}
