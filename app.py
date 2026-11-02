@@ -208,4 +208,41 @@ with tab_eval:
     st.download_button("Download predictions as CSV", pred_table.to_csv(index=False).encode(),
                        f"predictions_{MODEL_FILES[chosen].replace('.joblib', '')}.csv", "text/csv")
 
+# ---------------------------------------------------------------- comparison tab
+with tab_compare:
+    st.subheader("Every model on the same uploaded file")
+    table = {}
+    for name in MODEL_FILES:
+        s, _, _ = score_model(load_pipeline(name), X, y, classes)
+        table[name] = s
+    comp = pd.DataFrame(table).T[METRIC_ORDER]
+    st.dataframe(comp.style.format(fmt, na_rep="n/a").highlight_max(axis=0, color="#e8d3b0"),
+                 width="stretch")
 
+    plot_df = comp.drop(columns=["AUC"]).reset_index(names="Model").melt(
+        id_vars="Model", var_name="Metric", value_name="Score")
+    fig, ax = plt.subplots(figsize=(9, 4))
+    sns.barplot(data=plot_df, x="Metric", y="Score", hue="Model", palette="copper", ax=ax)
+    ax.set_ylim(max(0.0, plot_df["Score"].min() - 0.05), 1.0)
+    ax.legend(fontsize=7, loc="lower right")
+    fig.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+
+    best_name = comp["F1"].idxmax()
+    st.success(f"Highest macro-F1 on this file: {best_name} ({comp.loc[best_name, 'F1']:.4f})")
+
+# ---------------------------------------------------------------- errors tab
+with tab_errors:
+    wrong = raw_kept.assign(Predicted=y_pred)[y_pred != y.values]
+    st.write(f"{chosen} misclassified {len(wrong):,} of {len(X):,} rows "
+             f"({len(wrong) / len(X):.1%}).")
+    if wrong.empty:
+        st.write("No errors on this file.")
+    else:
+        pairs = (pd.DataFrame({"Actual": y[y_pred != y.values].values,
+                               "Predicted": y_pred[y_pred != y.values]})
+                 .value_counts().reset_index(name="Count").head(8))
+        st.markdown("**Most frequent confusions**")
+        st.dataframe(pairs, width="stretch")
+        st.dataframe(wrong.head(200), width="stretch")
