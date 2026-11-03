@@ -40,7 +40,7 @@ st.markdown(
         padding: 0.6rem 0.9rem; border-radius: 6px;
     }
     div[data-testid="stMetricValue"] {color: #4a2f14;}
-    div[data-testid="stMetricLabel"] p {color: #4a2f14;}
+    label[data-testid="stMetricLabel"] p {color: #4a2f14;}
     </style>
     """,
     unsafe_allow_html=True,
