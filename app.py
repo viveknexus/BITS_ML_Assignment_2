@@ -104,7 +104,8 @@ st.write(
 
 if uploaded is None and not use_sample:
     st.info("Upload a CSV in the sidebar to begin. The file must contain the 16 feature "
-            f"columns and the `{target}` column.")
+            f"columns and the `{target}` column. For a one-click demo, tick "
+            "'Use bundled test_data.csv' in the sidebar.")
     with st.expander("Required columns"):
         st.code(", ".join(features + [target]))
     st.stop()
