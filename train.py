@@ -5,45 +5,28 @@ Outputs: model/*.joblib, model/metrics.csv, model/meta.json, model/train_log.txt
 """
 import json
 import time
-from pathlib import Path
-
 import joblib
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (accuracy_score, f1_score, matthews_corrcoef,
                              precision_score, recall_score, roc_auc_score)
-from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-ROOT = Path(__file__).parent
-RAW_CSV = ROOT / "data" / "dry_bean.csv"
-ARTIFACTS = ROOT / "model"
-LABEL_COL = "Class"
-RNG = 2026
-HOLDOUT_FRACTION = 0.20
+from preprocess import (HOLDOUT_FRACTION, LABEL_COL, RNG, ROOT, load_clean_beans,
+                        make_pipe, split_beans)
 
+ARTIFACTS = ROOT / "model"
 ARTIFACTS.mkdir(exist_ok=True)
 
-beans = pd.read_csv(RAW_CSV)
-rows_raw = len(beans)
-# Exact duplicate grains would sit in both train and test and inflate the scores.
-beans = beans.drop_duplicates().reset_index(drop=True)
+beans, rows_raw = load_clean_beans()
 print(f"rows: {rows_raw} -> {len(beans)} after dropping exact duplicates")
 
-feature_cols = [c for c in beans.columns if c != LABEL_COL]
-X_all, y_all = beans[feature_cols], beans[LABEL_COL]
-X_fit, X_hold, y_fit, y_hold = train_test_split(
-    X_all, y_all, test_size=HOLDOUT_FRACTION, stratify=y_all, random_state=RNG)
+X_fit, X_hold, y_fit, y_hold, feature_cols = split_beans(beans)
 print(f"train={len(X_fit)}  hold-out={len(X_hold)}")
-
-# Every pipeline starts with a scaler that is fitted on the training part only.
-def make_pipe(estimator):
-    return Pipeline([("scale", StandardScaler()), ("clf", estimator)])
 
 # (estimator, hyper-parameter grid). Grids are searched with CV on the training split only.
 candidates = {
@@ -102,7 +85,7 @@ with open(ARTIFACTS / "meta.json", "w") as fh:
     json.dump({
         "target": LABEL_COL,
         "features": feature_cols,
-        "classes": [str(c) for c in sorted(y_all.unique())],
+        "classes": [str(c) for c in sorted(beans[LABEL_COL].unique())],
         "random_state": RNG,
         "holdout_fraction": HOLDOUT_FRACTION,
         "rows_raw": rows_raw,
