@@ -1,5 +1,5 @@
 Model,Accuracy,AUC,Precision,Recall,F1,MCC
-bean_logistic_regression,0.9251,0.9947,0.9373,0.9375,0.9374,0.9094
+bean_logistic_regression,0.9247,0.9946,0.9355,0.9374,0.9364,0.909
 bean_decision_tree,0.9055,0.9895,0.9185,0.9179,0.9182,0.8857
 bean_knn,0.9228,0.9882,0.9374,0.9364,0.9369,0.9067
 bean_naive_bayes,0.8992,0.9914,0.9067,0.9123,0.9092,0.8786
